@@ -1,0 +1,2440 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>REAL LIFE GAME CENTER</title>
+  <style>
+    :root{
+      --bg:#070A0F;
+      --card:#0E1422;
+      --text:#EAF2FF;
+      --muted:#98A7C1;
+      --border:rgba(255,255,255,.09);
+      --accent:#7C5CFF;
+      --accent2:#00E5FF;
+      --good:#2EE59D;
+      --bad:#FF5C7A;
+      --warn:#FFD166;
+      --shadow: 0 16px 44px rgba(0,0,0,.55);
+
+      --bgDim: .62;
+      --bgBlur: 0px;
+      --sakuraOpacity: .55;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial;
+      color:var(--text);
+      background:
+        radial-gradient(1200px 700px at 10% -20%, rgba(124,92,255,.28), transparent 60%),
+        radial-gradient(900px 700px at 110% 0%, rgba(0,229,255,.18), transparent 55%),
+        radial-gradient(900px 700px at 30% 120%, rgba(46,229,157,.12), transparent 60%),
+        var(--bg);
+      overflow-x:hidden;
+    }
+    .bgLayer{
+      position:fixed; inset:0;
+      background-position:center;
+      background-size:cover;
+      background-repeat:no-repeat;
+      filter: blur(var(--bgBlur));
+      transform: scale(1.02);
+      z-index:-3;
+      opacity:1;
+    }
+    .bgDim{
+      position:fixed; inset:0;
+      background: rgba(7,10,15,var(--bgDim));
+      z-index:-2;
+    }
+    .bgGlow{
+      position:fixed; inset:0;
+      background:
+        radial-gradient(900px 700px at 15% 0%, rgba(124,92,255,.25), transparent 55%),
+        radial-gradient(900px 700px at 100% 10%, rgba(0,229,255,.16), transparent 55%),
+        radial-gradient(900px 700px at 40% 115%, rgba(255,182,193,.12), transparent 60%);
+      z-index:-1;
+      pointer-events:none;
+      mix-blend-mode: screen;
+      opacity:.65;
+    }
+
+    .wrap{max-width:1180px;margin:0 auto;padding:18px}
+    header{
+      display:flex; justify-content:space-between; gap:12px; align-items:flex-start; flex-wrap:wrap;
+      margin-bottom:14px;
+    }
+    .brand{display:flex; flex-direction:column; gap:6px}
+    .brand h1{margin:0; font-size:20px; letter-spacing:.35px}
+    .brand .sub{color:var(--muted); font-size:13px; line-height:1.35}
+    .actions{display:flex; gap:8px; align-items:center; flex-wrap:wrap; justify-content:flex-end}
+    .pill{
+      border:1px solid var(--border);
+      padding:8px 10px;
+      border-radius:999px;
+      background: rgba(255,255,255,.03);
+      color:var(--muted);
+      font-size:13px;
+      user-select:none;
+      display:inline-flex;
+      gap:8px;
+      align-items:center;
+    }
+    button{
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.03);
+      color:var(--text);
+      padding:9px 11px;
+      border-radius:12px;
+      cursor:pointer;
+      font-weight:650;
+      font-size:13px;
+      transition: transform .06s ease, background .15s ease, border-color .15s ease;
+    }
+    button:hover{background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.15)}
+    button:active{transform: translateY(1px)}
+    .primary{
+      border-color: rgba(124,92,255,.35);
+      background: linear-gradient(90deg, rgba(124,92,255,.22), rgba(0,229,255,.14));
+    }
+    .danger{
+      border-color: rgba(255,92,122,.35);
+      background: rgba(255,92,122,.08);
+    }
+
+    .tabs{
+      display:flex; gap:8px; flex-wrap:wrap;
+      margin:12px 0 14px;
+    }
+    .tab{
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.02);
+      color:var(--muted);
+      padding:9px 11px;
+      border-radius:999px;
+      cursor:pointer;
+      user-select:none;
+      font-weight:650;
+      font-size:13px;
+    }
+    .tab.active{
+      color:var(--text);
+      border-color: rgba(124,92,255,.4);
+      background: linear-gradient(90deg, rgba(124,92,255,.18), rgba(0,229,255,.10));
+    }
+
+    .grid{display:grid; grid-template-columns: 1.05fr .95fr; gap:14px}
+    @media (max-width: 980px){ .grid{grid-template-columns:1fr} }
+
+    .card{
+      position:relative;
+      background: linear-gradient(180deg, rgba(255,255,255,.05), transparent 35%), rgba(14,20,34,.92);
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:14px;
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .card h2{margin:0 0 10px 0; font-size:14px; color:#DCE8FF; letter-spacing:.2px}
+    .muted{color:var(--muted); font-size:12px; line-height:1.4}
+    .sep{height:1px;background:var(--border);margin:10px 0}
+
+    .sakuraFrame{
+      position:absolute; inset:-18px;
+      pointer-events:none;
+      opacity: var(--sakuraOpacity);
+      filter: drop-shadow(0 12px 22px rgba(0,0,0,.45));
+      mix-blend-mode: screen;
+    }
+    .sakuraFrame svg{width:100%; height:100%}
+
+    .hud{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+    }
+    @media (max-width: 520px){ .hud{grid-template-columns:1fr} }
+    .stat{
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:10px;
+      background: rgba(0,0,0,.16);
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+    .stat .k{font-size:12px;color:var(--muted)}
+    .stat .v{font-size:18px;font-weight:800; letter-spacing:.2px}
+
+    .bar{
+      width:100%;
+      height:10px;
+      border-radius:999px;
+      background: rgba(255,255,255,.07);
+      border:1px solid rgba(255,255,255,.06);
+      overflow:hidden;
+    }
+    .bar > div{
+      height:100%;
+      width:0%;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      transition: width .25s ease;
+    }
+
+    .badge{
+      font-size:11px;
+      padding:4px 8px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.02);
+      color:var(--muted);
+      display:inline-flex; gap:6px; align-items:center;
+    }
+    .ok{color:#DFFFEF;border-color: rgba(46,229,157,.35); background: rgba(46,229,157,.07)}
+    .warn{color:#FFF4D6;border-color: rgba(255,209,102,.35); background: rgba(255,209,102,.07)}
+    .bad{color:#FFDCE3;border-color: rgba(255,92,122,.35); background: rgba(255,92,122,.08)}
+    .tiny{font-size:11px;color:var(--muted)}
+
+    .povertyWrap{
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:12px;
+      background: linear-gradient(180deg, rgba(255,92,122,.10), rgba(0,0,0,.0) 55%), rgba(0,0,0,.12);
+      display:flex; flex-direction:column; gap:10px;
+    }
+    .povertyTop{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+    .povertyTitle{font-weight:900; letter-spacing:.25px}
+    .povertyLevel{font-weight:900; color:#FFDCE3}
+    .pips{display:flex; gap:8px; flex-wrap:wrap}
+    .pip{
+      width:18px;height:18px;border-radius:6px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.04);
+    }
+    .pip.on{
+      border-color: rgba(255,92,122,.55);
+      background: rgba(255,92,122,.20);
+      box-shadow: 0 0 0 4px rgba(255,92,122,.06);
+    }
+    .pillRow{display:flex;gap:8px;flex-wrap:wrap}
+
+    .list{display:flex;flex-direction:column;gap:10px}
+    .task{
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:10px;
+      background: rgba(255,255,255,.02);
+      display:flex;
+      gap:10px;
+      justify-content:space-between;
+      align-items:flex-start;
+    }
+    .left{display:flex;gap:10px;align-items:flex-start}
+    .chk{
+      width:22px;height:22px;border-radius:8px;
+      border:1px solid rgba(255,255,255,.18);
+      display:grid; place-items:center;
+      cursor:pointer; user-select:none; flex:0 0 auto;
+      background: rgba(0,0,0,.15);
+    }
+    .chk.done{
+      border-color: rgba(46,229,157,.55);
+      background: rgba(46,229,157,.15);
+    }
+    .chk span{font-size:14px; opacity:.95}
+    .meta{display:flex;flex-direction:column;gap:4px}
+    .meta .t{font-size:14px;font-weight:800}
+    .meta .d{font-size:12px;color:var(--muted);line-height:1.35}
+    .tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:2px}
+    .tag{
+      font-size:11px;padding:4px 8px;border-radius:999px;
+      border:1px solid var(--border); color:var(--muted);
+      background: rgba(255,255,255,.02);
+    }
+    .xp{font-size:12px;color:#CFE0FF;white-space:nowrap}
+    .right{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+
+    input, select, textarea{
+      width:100%;
+      padding:10px 10px;
+      border-radius:12px;
+      border:1px solid var(--border);
+      background: rgba(0,0,0,.18);
+      color:var(--text);
+      outline:none;
+    }
+    textarea{min-height:70px; resize:vertical}
+    label{font-size:12px;color:var(--muted)}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    @media (max-width: 640px){ .grid2{grid-template-columns:1fr} }
+
+    .mini{
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:10px;
+      background: rgba(0,0,0,.12);
+    }
+
+    .timerBox{
+      display:flex; flex-direction:column; gap:10px;
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:12px;
+      background: linear-gradient(180deg, rgba(0,229,255,.10), rgba(0,0,0,.0) 55%), rgba(0,0,0,.10);
+    }
+    .timerTop{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+    .timerTime{font-size:26px;font-weight:950; letter-spacing:.5px}
+    .timerState{font-size:12px;color:var(--muted)}
+    .timerBtns{display:flex;gap:8px;flex-wrap:wrap}
+
+    .toast{
+      position:fixed;
+      left:50%;
+      bottom:18px;
+      transform:translateX(-50%);
+      background: rgba(14,20,34,.92);
+      border:1px solid rgba(255,255,255,.12);
+      padding:10px 12px;
+      border-radius:999px;
+      color:#DCE8FF;
+      font-size:13px;
+      box-shadow: var(--shadow);
+      opacity:0;
+      pointer-events:none;
+      transition: opacity .2s ease, transform .2s ease;
+      z-index:9999;
+    }
+    .toast.show{opacity:1; transform:translateX(-50%) translateY(-2px)}
+    .hidden{display:none !important;}
+
+    .modalBack{
+      position:fixed; inset:0;
+      background: rgba(0,0,0,.55);
+      backdrop-filter: blur(6px);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:16px;
+      z-index:9998;
+    }
+    .modalBack.show{display:flex;}
+    .modal{
+      width:min(760px, 100%);
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.12);
+      background: linear-gradient(180deg, rgba(255,255,255,.06), transparent 30%), rgba(14,20,34,.95);
+      box-shadow: var(--shadow);
+      padding:14px;
+    }
+    .modalTop{
+      display:flex; justify-content:space-between; align-items:flex-start; gap:10px; flex-wrap:wrap;
+      margin-bottom:10px;
+    }
+    .modalTitle{font-weight:950; letter-spacing:.25px}
+    .modalBtns{display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end}
+    .ghost{opacity:.9}
+  </style>
+</head>
+<body>
+  <div class="bgLayer" id="bgLayer"></div>
+  <div class="bgDim"></div>
+  <div class="bgGlow"></div>
+
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <h1>REAL LIFE GAME CENTER</h1>
+        <div class="sub">
+          <span id="headerSubText">Цели: <b>10k TikTok</b> + <b>$1500/мес</b>. Дейли (5), минимум <b>3</b> в день. Спорт <b>Пн/Ср/Пт</b>, церковь <b>Вс</b>.</span>
+        </div>
+      </div>
+      <div class="actions">
+        <div class="pill" id="todayPill">📅 Сегодня: —</div>
+        <button class="primary" id="newDayBtn">Новый день</button>
+        <button id="exportBtn">Экспорт JSON</button>
+        <button id="importBtn">Импорт JSON</button>
+        <button class="danger" id="wipeBtn">Сброс</button>
+      </div>
+    </header>
+
+    <div class="tabs">
+      <div class="tab active" data-tab="dash">Дашборд</div>
+      <div class="tab" data-tab="missions">Миссии</div>
+      <div class="tab" data-tab="ideas">Идеи</div>
+      <div class="tab" data-tab="goals">Цели</div>
+      <div class="tab" data-tab="stats">Статы</div>
+      <div class="tab" data-tab="settings">Настройки</div>
+    </div>
+
+    <!-- DASH -->
+    <div id="tab-dash" class="grid">
+      <div class="card" id="dashCard">
+        <div class="sakuraFrame" aria-hidden="true">
+          <svg viewBox="0 0 1200 700" preserveAspectRatio="none">
+            <path d="M-50,120 C160,90 220,160 340,190 C470,230 520,160 650,145 C820,125 860,220 1030,210 C1120,205 1180,170 1250,150"
+                  fill="none" stroke="rgba(255,192,203,.35)" stroke-width="6"/>
+            <path d="M-60,620 C160,590 260,560 380,520 C520,470 580,610 720,570 C860,530 910,520 1040,500 C1120,485 1180,520 1260,560"
+                  fill="none" stroke="rgba(255,192,203,.30)" stroke-width="7"/>
+            <path d="M60,0 C120,100 80,160 120,220 C170,300 240,260 270,330 C310,420 240,470 220,540 C200,610 230,650 280,700"
+                  fill="none" stroke="rgba(255,192,203,.22)" stroke-width="6"/>
+            <g fill="rgba(255,182,193,.22)">
+              <circle cx="140" cy="175" r="6"/><circle cx="170" cy="185" r="5"/><circle cx="205" cy="160" r="6"/>
+              <circle cx="360" cy="210" r="6"/><circle cx="410" cy="230" r="5"/><circle cx="460" cy="195" r="6"/>
+              <circle cx="700" cy="155" r="6"/><circle cx="760" cy="175" r="5"/><circle cx="820" cy="150" r="6"/>
+              <circle cx="1060" cy="215" r="6"/><circle cx="1120" cy="190" r="5"/>
+              <circle cx="320" cy="535" r="6"/><circle cx="380" cy="515" r="5"/><circle cx="450" cy="545" r="6"/>
+              <circle cx="720" cy="585" r="6"/><circle cx="790" cy="560" r="5"/><circle cx="860" cy="590" r="6"/>
+              <circle cx="1080" cy="505" r="6"/><circle cx="1140" cy="535" r="5"/>
+            </g>
+          </svg>
+        </div>
+
+        <h2>Сегодняшний забег</h2>
+        <div class="muted">Закрой минимум <b>3</b> дейли — день засчитан. TikTok — минимум <b>1 видео/день</b>.</div>
+        <div class="sep"></div>
+
+        <div class="list" id="todayList"></div>
+
+        <div class="sep"></div>
+
+        <div class="grid2">
+          <div class="mini">
+            <div class="muted">Контент трекер</div>
+            <div style="margin-top:8px; display:flex; gap:8px; flex-wrap:wrap; align-items:center">
+              <span class="badge ok" id="tiktokBadge">🎥 TikTok: 0/1</span>
+              <span class="badge warn" id="tgBadge">✍️ Telegram: 0/2 (неделя)</span>
+              <span class="badge warn" id="ytBadge">▶️ YouTube: 0/2 (месяц)</span>
+            </div>
+            <div class="pillRow" style="margin-top:10px">
+              <button class="primary" id="addTikTokBtn">+ TikTok видео</button>
+              <button id="addTGBtn">+ Telegram пост</button>
+              <button id="addYTBtn">+ YouTube ролик</button>
+            </div>
+            <div class="tiny" style="margin-top:8px">Telegram сбрасывается по ISO-неделе. YouTube — по месяцу.</div>
+          </div>
+
+          <div class="timerBox">
+            <div class="timerTop">
+              <div>
+                <div class="muted">Фокус-сессия</div>
+                <div class="timerTime" id="timerTime">30:00</div>
+                <div class="timerState" id="timerState">Готов</div>
+              </div>
+              <div class="pillRow">
+                <span class="badge" id="focusXPBadge">+0 XP (фокус)</span>
+                <span class="badge" id="focusCountBadge">Сессии: 0</span>
+              </div>
+            </div>
+            <div class="timerBtns">
+              <button class="primary" id="timerStartBtn">Старт 30:00</button>
+              <button id="timerPauseBtn">Пауза</button>
+              <button id="timerResetBtn">Сброс</button>
+            </div>
+            <div class="tiny">Каждая завершённая сессия: <b>+20 XP в Capital</b> и минус “НИЩЕТА” (если она > 0).</div>
+          </div>
+        </div>
+
+        <div class="sep"></div>
+
+        <div class="povertyWrap">
+          <div class="povertyTop">
+            <div>
+              <div class="povertyTitle">НИЩЕТА (уровень риска)</div>
+              <div class="tiny">Растёт от дэбафов и плохого дня. Снижается фокусом и чистыми днями.</div>
+            </div>
+            <div class="povertyLevel">Уровень: <span id="povertyLevel">0</span>/5</div>
+          </div>
+          <div class="pips" id="povertyPips"></div>
+          <div class="pillRow">
+            <button class="danger" id="addDebuffBtn">+ Дэбаф</button>
+            <button id="reducePovertyBtn">– Нищета</button>
+            <button id="viewDebuffsBtn">Журнал дэбафов</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>HUD персонажа</h2>
+        <div class="muted">Уровень: каждые <b>100 XP</b>. Ранг зависит от уровня.</div>
+        <div class="sep"></div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap">
+          <div style="font-weight:950">
+            Level <span id="level">1</span>
+            <span class="badge" id="rankBadge" style="margin-left:10px">🏷️ —</span>
+          </div>
+          <div class="muted"><span id="xpTotal">0</span> XP • до следующего: <span id="toNext">100</span></div>
+        </div>
+        <div class="bar" style="margin-top:8px"><div id="xpBar"></div></div>
+
+        <div class="sep"></div>
+
+        <div class="hud">
+          <div class="stat"><div class="k">🔥 Streak</div><div class="v"><span id="streak">0</span> дней</div></div>
+          <div class="stat"><div class="k">✅ Дейли сегодня</div><div class="v"><span id="doneDaily">0</span>/5</div></div>
+          <div class="stat"><div class="k">🎯 Минимум для дня</div><div class="v"><span id="dailyMin">3</span></div></div>
+          <div class="stat"><div class="k">💰 Capital XP</div><div class="v" id="bCapital">0</div></div>
+          <div class="stat"><div class="k">🧠 Mind XP</div><div class="v" id="bMind">0</div></div>
+          <div class="stat"><div class="k">💪 Body XP</div><div class="v" id="bBody">0</div></div>
+          <div class="stat"><div class="k">🌐 Influence XP</div><div class="v" id="bInfluence">0</div></div>
+          <div class="stat"><div class="k">🎭 Style XP</div><div class="v" id="bStyle">0</div></div>
+        </div>
+
+        <div class="sep"></div>
+
+        <h2>Напоминания</h2>
+        <div class="muted">Внутри приложения. По умолчанию: 13:00 и 20:00.</div>
+        <div class="sep"></div>
+        <div class="grid2">
+          <div>
+            <label>Напоминание #1 (HH:MM)</label>
+            <input id="rem1" placeholder="13:00"/>
+          </div>
+          <div>
+            <label>Напоминание #2 (HH:MM)</label>
+            <input id="rem2" placeholder="20:00"/>
+          </div>
+        </div>
+        <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap">
+          <button id="saveRemBtn">Сохранить</button>
+          <button id="testRemBtn" class="primary">Тест</button>
+          <span class="badge" id="remStateBadge">🔔 Вкл</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- MISSIONS -->
+    <div id="tab-missions" class="grid hidden">
+      <div class="card">
+        <h2>Дейли (5)</h2>
+        <div class="muted">Минимум <b>3</b> закрытых дейли = день засчитан.</div>
+        <div class="sep"></div>
+        <div class="list" id="dailyList"></div>
+      </div>
+
+      <div class="card">
+        <h2>Добавить миссию</h2>
+        <div class="sep"></div>
+
+        <div class="grid2">
+          <div>
+            <label>Название</label>
+            <input id="newTitle" placeholder="Например: написать 1 скрипт / снять 1 видео"/>
+          </div>
+          <div>
+            <label>Тип</label>
+            <select id="newType">
+              <option value="daily">Daily</option>
+              <option value="quest">Quest</option>
+            </select>
+          </div>
+          <div>
+            <label>Ветка</label>
+            <select id="newBranch">
+              <option value="Capital">Capital</option>
+              <option value="Mind">Mind</option>
+              <option value="Influence">Influence</option>
+              <option value="Body">Body</option>
+              <option value="Style">Style</option>
+            </select>
+          </div>
+          <div>
+            <label>XP</label>
+            <input id="newXP" type="number" min="1" value="10"/>
+          </div>
+        </div>
+
+        <div style="margin-top:10px">
+          <label>Описание (необязательно)</label>
+          <textarea id="newDesc" placeholder="Что считается выполнением."></textarea>
+        </div>
+
+        <div class="grid2" style="margin-top:10px">
+          <div>
+            <label>Расписание (только для Daily)</label>
+            <select id="newSched">
+              <option value="always">Всегда</option>
+              <option value="mwf">Пн/Ср/Пт</option>
+              <option value="sun">Воскресенье</option>
+            </select>
+          </div>
+          <div style="display:flex; align-items:flex-end; gap:8px; flex-wrap:wrap">
+            <button class="primary" id="addTaskBtn" style="width:100%">Добавить</button>
+          </div>
+        </div>
+
+        <div class="sep"></div>
+
+        <h2>Quests</h2>
+        <div class="muted">Разовые задачи. Выполнил — получил XP.</div>
+        <div class="sep"></div>
+        <div class="list" id="questList"></div>
+
+        <div class="sep"></div>
+        <button id="seedBtn">Вернуть базовые дейли</button>
+      </div>
+    </div>
+
+    <!-- IDEAS -->
+    <div id="tab-ideas" class="grid hidden">
+      <div class="card">
+        <h2>Банк идей</h2>
+        <div class="muted">Встроенный редактор: добавлять/редактировать/удалять, менять статус/платформу.</div>
+        <div class="sep"></div>
+
+        <div class="grid2">
+          <div>
+            <label>Платформа</label>
+            <select id="ideaPlatform">
+              <option value="TikTok">TikTok</option>
+              <option value="Telegram">Telegram</option>
+              <option value="YouTube">YouTube</option>
+            </select>
+          </div>
+          <div>
+            <label>Статус</label>
+            <select id="ideaStatus">
+              <option value="idea">Идея</option>
+              <option value="draft">Черновик</option>
+              <option value="posted">Опубликовано</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="margin-top:10px">
+          <label>Текст идеи</label>
+          <textarea id="ideaText" placeholder="Крючок → мысль → финальная фраза."></textarea>
+        </div>
+
+        <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap">
+          <button class="primary" id="addIdeaBtn">Добавить</button>
+          <button id="clearIdeaBtn">Очистить</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Список идей</h2>
+        <div class="sep"></div>
+
+        <div class="grid2" style="margin-bottom:10px">
+          <div>
+            <label>Фильтр платформа</label>
+            <select id="filterPlatform">
+              <option value="all">Все</option>
+              <option value="TikTok">TikTok</option>
+              <option value="Telegram">Telegram</option>
+              <option value="YouTube">YouTube</option>
+            </select>
+          </div>
+          <div>
+            <label>Фильтр статус</label>
+            <select id="filterStatus">
+              <option value="all">Все</option>
+              <option value="idea">Идея</option>
+              <option value="draft">Черновик</option>
+              <option value="posted">Опубликовано</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="list" id="ideaList"></div>
+      </div>
+    </div>
+
+    <!-- GOALS -->
+    <div id="tab-goals" class="grid hidden">
+      <div class="card">
+        <h2>Цели (редактор)</h2>
+        <div class="muted">Добавляй любые цели: текущий прогресс, таргет, дедлайн, заметки. Всё редактируется.</div>
+        <div class="sep"></div>
+
+        <div class="grid2">
+          <div>
+            <label>Название цели</label>
+            <input id="goalName" placeholder="Например: TikTok 10k / Доход $1500"/>
+          </div>
+          <div>
+            <label>Единица</label>
+            <input id="goalUnit" placeholder="подписчики / $ / видео"/>
+          </div>
+          <div>
+            <label>Текущий прогресс</label>
+            <input id="goalCurrent" type="number" min="0" value="0"/>
+          </div>
+          <div>
+            <label>Цель (таргет)</label>
+            <input id="goalTarget" type="number" min="0" value="100"/>
+          </div>
+        </div>
+
+        <div style="margin-top:10px">
+          <label>Дедлайн</label>
+          <input id="goalDeadline" type="date"/>
+        </div>
+
+        <div style="margin-top:10px">
+          <label>Заметка (необязательно)</label>
+          <textarea id="goalNote" placeholder="Как достигать / критерий успеха."></textarea>
+        </div>
+
+        <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap">
+          <button class="primary" id="addGoalBtn">Добавить цель</button>
+          <button id="clearGoalBtn">Очистить</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Список целей</h2>
+        <div class="muted">Клик по цели — открыть редактор.</div>
+        <div class="sep"></div>
+        <div class="list" id="goalList"></div>
+      </div>
+    </div>
+
+    <!-- STATS -->
+    <div id="tab-stats" class="grid hidden">
+      <div class="card">
+        <h2>Журнал дэбафов</h2>
+        <div class="muted">Дэбафы: алкоголь, сигареты, соцсети, обман, безделье.</div>
+        <div class="sep"></div>
+        <div class="list" id="debuffList"></div>
+      </div>
+
+      <div class="card">
+        <h2>Дизайн: фон и сакура</h2>
+        <div class="muted">Загрузи свою картинку (аниме 2D) — она станет фоном. Всё хранится локально.</div>
+        <div class="sep"></div>
+
+        <div class="mini">
+          <label>Загрузить фон (jpg/png/webp)</label>
+          <input id="bgUpload" type="file" accept="image/*"/>
+          <div class="pillRow" style="margin-top:10px">
+            <button id="clearBgBtn">Убрать фон</button>
+          </div>
+          <div class="sep"></div>
+
+          <div class="grid2">
+            <div>
+              <label>Затемнение (0.0–0.9)</label>
+              <input id="bgDimInput" type="number" min="0" max="0.9" step="0.01" value="0.62"/>
+            </div>
+            <div>
+              <label>Размытие (px)</label>
+              <input id="bgBlurInput" type="number" min="0" max="24" step="1" value="0"/>
+            </div>
+            <div>
+              <label>Сакура (0.0–1.0)</label>
+              <input id="sakuraInput" type="number" min="0" max="1" step="0.05" value="0.55"/>
+            </div>
+            <div style="display:flex; align-items:flex-end; gap:8px; flex-wrap:wrap">
+              <button class="primary" id="saveVisualBtn">Сохранить</button>
+              <button id="testVisualBtn">Тест</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="sep"></div>
+
+        <h2>Правила НИЩЕТЫ</h2>
+        <div class="muted">
+          <ul style="margin:0; padding-left:18px; line-height:1.5">
+            <li><b>+1</b> НИЩЕТА за каждый дэбаф.</li>
+            <li><b>+1</b> НИЩЕТА, если день засчитан, но <b>Capital-дейли не сделан</b>.</li>
+            <li><b>+1</b> НИЩЕТА, если день <b>не засчитан</b> (меньше минимума).</li>
+            <li><b>-1</b> НИЩЕТА за завершённую фокус-сессию (если НИЩЕТА &gt; 0).</li>
+            <li><b>-1</b> НИЩЕТА за “чистый день”: минимум дейли выполнен и <b>0 дэбафов</b>.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div id="tab-settings" class="grid hidden">
+      <div class="card">
+        <h2>Система</h2>
+        <div class="sep"></div>
+
+        <div class="grid2">
+          <div>
+            <label>XP за уровень</label>
+            <input id="xpPerLevel" type="number" min="10" value="100"/>
+          </div>
+          <div>
+            <label>Минимум дейли для дня</label>
+            <input id="dailyMinInput" type="number" min="1" max="5" value="3"/>
+          </div>
+          <div>
+            <label>XP за фокус-сессию (30 мин)</label>
+            <input id="focusXP" type="number" min="1" value="20"/>
+          </div>
+          <div>
+            <label>Макс НИЩЕТА</label>
+            <input id="povertyMax" type="number" min="3" max="10" value="5"/>
+          </div>
+        </div>
+
+        <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap">
+          <button class="primary" id="saveSettingsBtn">Сохранить настройки</button>
+          <span class="badge" id="savedBadge">⚙️ Готово</span>
+        </div>
+      </div>
+
+      
+      <div class="card">
+        <h2>Кастомизация (средний уровень)</h2>
+        <div class="muted">Меняй шапку, ветки, ранги, правила НИЩЕТЫ и лимиты контента. Структура системы остаётся как у автора.</div>
+        <div class="sep"></div>
+
+        <div class="mini">
+          <div class="muted">Текст в шапке (под заголовком)</div>
+          <div style="margin-top:8px">
+            <textarea id="headerTextInput" placeholder="Цели: ..."></textarea>
+          </div>
+        </div>
+
+        <div class="sep"></div>
+
+        <div class="mini">
+          <div class="muted">Ветки (ID фиксированные, можно менять отображение)</div>
+          <div class="sep"></div>
+          <div id="branchEditList" class="list"></div>
+        </div>
+
+        <div class="sep"></div>
+
+        <div class="mini">
+          <div class="muted">Ранги (привязка к Level)</div>
+          <div class="sep"></div>
+          <div id="rankEditList" class="list"></div>
+          <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap">
+            <button id="addRankRowBtn">+ Ранг</button>
+          </div>
+        </div>
+
+        <div class="sep"></div>
+
+        <div class="mini">
+          <div class="muted">НИЩЕТА: правила (числа влияют на логику)</div>
+          <div class="sep"></div>
+          <div class="grid2">
+            <div><label>За дэбаф</label><input id="prDebuff" type="number" step="1"/></div>
+            <div><label>Если день не засчитан</label><input id="prFailDay" type="number" step="1"/></div>
+            <div><label>Если день засчитан, но Capital-дейли не сделан</label><input id="prMissCapital" type="number" step="1"/></div>
+            <div><label>За “чистый день”</label><input id="prCleanDay" type="number" step="1"/></div>
+            <div><label>За фокус-сессию</label><input id="prFocus" type="number" step="1"/></div>
+          </div>
+        </div>
+
+        <div class="sep"></div>
+
+        <div class="mini">
+          <div class="muted">Контент-трекер: лимиты</div>
+          <div class="sep"></div>
+          <div class="grid2">
+            <div><label>TikTok в день</label><input id="ctTikTok" type="number" min="0" step="1"/></div>
+            <div><label>Telegram в неделю</label><input id="ctTG" type="number" min="0" step="1"/></div>
+            <div><label>YouTube в месяц</label><input id="ctYT" type="number" min="0" step="1"/></div>
+          </div>
+        </div>
+
+        <div class="sep"></div>
+
+        <div style="display:flex; gap:8px; flex-wrap:wrap">
+          <button class="primary" id="saveCustomBtn">Сохранить кастомизацию</button>
+          <button id="resetCustomBtn">Сброс к дефолту автора</button>
+          <span class="badge" id="customSavedBadge">✨</span>
+        </div>
+      </div>
+
+<div class="card">
+        <h2>Ранги</h2>
+        <div class="muted">Привязаны к Level.</div>
+        <div class="sep"></div>
+        <div class="list" id="rankList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Idea Modal -->
+  <div class="modalBack" id="ideaModalBack">
+    <div class="modal">
+      <div class="modalTop">
+        <div>
+          <div class="modalTitle">Редактор идеи</div>
+          <div class="tiny" id="ideaModalMeta">—</div>
+        </div>
+        <div class="modalBtns">
+          <button id="ideaModalClose" class="ghost">Закрыть</button>
+          <button id="ideaModalDelete" class="danger">Удалить</button>
+          <button id="ideaModalSave" class="primary">Сохранить</button>
+        </div>
+      </div>
+
+      <div class="grid2">
+        <div>
+          <label>Платформа</label>
+          <select id="ideaModalPlatform">
+            <option value="TikTok">TikTok</option>
+            <option value="Telegram">Telegram</option>
+            <option value="YouTube">YouTube</option>
+          </select>
+        </div>
+        <div>
+          <label>Статус</label>
+          <select id="ideaModalStatus">
+            <option value="idea">Идея</option>
+            <option value="draft">Черновик</option>
+            <option value="posted">Опубликовано</option>
+          </select>
+        </div>
+      </div>
+      <div style="margin-top:10px">
+        <label>Текст</label>
+        <textarea id="ideaModalText"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- Goal Modal -->
+  <div class="modalBack" id="goalModalBack">
+    <div class="modal">
+      <div class="modalTop">
+        <div>
+          <div class="modalTitle">Редактор цели</div>
+          <div class="tiny" id="goalModalMeta">—</div>
+        </div>
+        <div class="modalBtns">
+          <button id="goalModalClose" class="ghost">Закрыть</button>
+          <button id="goalModalDelete" class="danger">Удалить</button>
+          <button id="goalModalSave" class="primary">Сохранить</button>
+        </div>
+      </div>
+
+      <div class="grid2">
+        <div><label>Название</label><input id="goalModalName"/></div>
+        <div><label>Единица</label><input id="goalModalUnit"/></div>
+        <div><label>Текущий</label><input id="goalModalCurrent" type="number" min="0"/></div>
+        <div><label>Таргет</label><input id="goalModalTarget" type="number" min="0"/></div>
+      </div>
+
+      <div style="margin-top:10px">
+        <label>Дедлайн</label>
+        <input id="goalModalDeadline" type="date"/>
+      </div>
+
+      <div style="margin-top:10px">
+        <label>Заметка</label>
+        <textarea id="goalModalNote"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">Сохранено</div>
+
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const STORAGE_KEY = "rlgc_full_v1";
+  const uuid = () => (crypto && crypto.randomUUID) ? crypto.randomUUID() :
+    "id_" + Math.random().toString(16).slice(2) + "_" + Date.now().toString(16);
+
+  const pad2 = (n) => String(n).padStart(2,"0");
+  const todayKey = () => {
+    const d = new Date();
+    return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
+  };
+  const weekKey = (dateObj=new Date()) => {
+    const d = new Date(Date.UTC(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate()));
+    const dayNum = d.getUTCDay() || 7;
+    d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+    const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
+    const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+    return `${d.getUTCFullYear()}-W${pad2(weekNo)}`;
+  };
+  const monthKey = (dateObj=new Date()) => `${dateObj.getFullYear()}-${pad2(dateObj.getMonth()+1)}`;
+  const dow = () => new Date().getDay(); // 0 Sun
+  const clamp = (v,min,max)=>Math.max(min, Math.min(max, v));
+
+  function getBranchMeta(branchId){
+    const bm = state.settings?.custom?.branchesMeta || {};
+    const it = bm[branchId] || { icon:"", name: branchId };
+    return { icon: (it.icon||""), name: (it.name||branchId) };
+  }
+
+  const toast = (msg) => {
+    const t = $("toast");
+    t.textContent = msg;
+    t.classList.add("show");
+    setTimeout(()=>t.classList.remove("show"), 1200);
+  };
+
+  function getRanks(){
+    const r = (state.settings && state.settings.custom && Array.isArray(state.settings.custom.ranks)) ? state.settings.custom.ranks : [];
+    return (r && r.length) ? r : [
+      { level: 1,  name: "БОМЖ НОУНЕЙМ", icon:"🗑️" },
+      { level: 3,  name: "ПОДВАЛЬНЫЙ СТРАТЕГ", icon:"🕳️" },
+      { level: 5,  name: "ШАВЕРМА-МАГНАТ", icon:"🥙" },
+      { level: 8,  name: "КОМНАТНЫЙ СТРАТЕГ", icon:"🖥️" },
+      { level: 12, name: "КИБЕР-САМУРАЙ", icon:"⚔️" },
+      { level: 16, name: "АЛГОРИТМ-ХАНТЕР", icon:"🧠" },
+      { level: 21, name: "КОНТЕНТ-АРХИТЕКТОР", icon:"🏗️" },
+      { level: 27, name: "СИНДИКАТ БУДУЩЕГО", icon:"🛰️" },
+      { level: 34, name: "НЕОН-ОЛИГАРХ", icon:"💎" },
+      { level: 42, name: "ЛЕГЕНДА СИСТЕМЫ", icon:"👑" }
+    ];
+  }
+  function getRank(level){
+    const ranks = getRanks().slice().sort((a,b)=> (a.level||0)-(b.level||0));
+    let r = ranks[0];
+    for(const it of ranks) if(level >= (it.level||0)) r = it;
+    return r;
+  }
+
+  function defaultState(){
+    return {
+      version: 1,
+      settings: {
+        xpPerLevel: 100,
+        dailyMin: 3,
+        focusXP: 20,
+        povertyMax: 5,
+        reminders: { enabled:true, t1:"13:00", t2:"20:00", lastFired:{} },
+        visuals: { bgDataUrl:null, dim:0.62, blurPx:0, sakura:0.55 },
+        custom: {
+          headerSubText: `Цели: <b>10k TikTok</b> + <b>$1500/мес</b>. Дейли (5), минимум <b>3</b> в день. Спорт <b>Пн/Ср/Пт</b>, церковь <b>Вс</b>.`,
+          branchesMeta: {
+            Capital:   { icon:"💰", name:"Capital" },
+            Mind:      { icon:"🧠", name:"Mind" },
+            Influence: { icon:"🌐", name:"Influence" },
+            Body:      { icon:"💪", name:"Body" },
+            Style:     { icon:"🎭", name:"Style" }
+          },
+          ranks: [
+            { level: 1,  name: "БОМЖ НОУНЕЙМ", icon:"🗑️" },
+            { level: 3,  name: "ПОДВАЛЬНЫЙ СТРАТЕГ", icon:"🕳️" },
+            { level: 5,  name: "ШАВЕРМА-МАГНАТ", icon:"🥙" },
+            { level: 8,  name: "КОМНАТНЫЙ СТРАТЕГ", icon:"🖥️" },
+            { level: 12, name: "КИБЕР-САМУРАЙ", icon:"⚔️" },
+            { level: 16, name: "АЛГОРИТМ-ХАНТЕР", icon:"🧠" },
+            { level: 21, name: "КОНТЕНТ-АРХИТЕКТОР", icon:"🏗️" },
+            { level: 27, name: "СИНДИКАТ БУДУЩЕГО", icon:"🛰️" },
+            { level: 34, name: "НЕОН-ОЛИГАРХ", icon:"💎" },
+            { level: 42, name: "ЛЕГЕНДА СИСТЕМЫ", icon:"👑" }
+          ],
+          povertyRules: { onDebuff: 1, onFailDay: 1, onMissCapital: 1, onCleanDay: -1, onFocus: -1 },
+          contentTargets: { tiktokPerDay: 1, tgPerWeek: 2, ytPerMonth: 2 }
+        },
+
+      },
+      xpTotal: 0,
+      branches: { Capital:0, Mind:0, Influence:0, Body:0, Style:0 },
+      streak: 0,
+      lastStreakDate: null,
+      poverty: 0,
+      content: {
+        tiktokDoneOn: {},
+        telegramCountByWeek: {},
+        youtubeCountByMonth: {}
+      },
+      focus: { sessionsDoneOn: {}, totalSessions: 0 },
+      daily: [],
+      quests: [],
+      debuffsByDate: {},
+      ideas: [],
+      goals: []
+    };
+  }
+
+  function seedBaseDailies(state){
+    const make = (title, branch, xp, desc, schedule) => ({
+      id: uuid(),
+      type: "daily",
+      title, branch, xp, desc,
+      schedule: schedule || "always",
+      doneOn: {}
+    });
+    state.daily = [
+      make("Деньги: 1 действие для будущего заработка", "Capital", 20,
+           "Лид / контакт / шаг по проекту / портфолио / обучение, которое прямо даёт деньги."),
+      make("Разум: 20 минут развития интеллекта", "Mind", 15,
+           "Чтение/конспект/учёба. Без скролла."),
+      make("Контент: 1 TikTok видео опубликовано", "Influence", 20,
+           "Снял/смонтировал/залил. После публикации нажми галочку."),
+      make("Спорт: тренировка (Пн/Ср/Пт)", "Body", 15,
+           "Тренировка/зал/дома. Только Пн/Ср/Пт.", "mwf"),
+      make("Церковь: поход (Вс)", "Mind", 10,
+           "Воскресная церковь (если идёшь — засчитывай).", "sun"),
+    ];
+  }
+  function seedBaseGoals(state){
+    state.goals = [
+      { id: uuid(), name:"TikTok: 10,000 подписчиков", unit:"подписчики", current:0, target:10000, deadline:"", note:"", createdAt:Date.now(), updatedAt:Date.now() },
+      { id: uuid(), name:"Доход: $1500 в месяц", unit:"$/мес", current:0, target:1500, deadline:"", note:"", createdAt:Date.now(), updatedAt:Date.now() }
+    ];
+  }
+
+  function load(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(!raw){
+        const st = defaultState();
+        seedBaseDailies(st);
+        seedBaseGoals(st);
+        return st;
+      }
+      const st = JSON.parse(raw);
+      const def = defaultState();
+
+      st.settings = st.settings || def.settings;
+      st.settings.xpPerLevel = st.settings.xpPerLevel ?? def.settings.xpPerLevel;
+      st.settings.dailyMin = st.settings.dailyMin ?? def.settings.dailyMin;
+      st.settings.focusXP = st.settings.focusXP ?? def.settings.focusXP;
+      st.settings.povertyMax = st.settings.povertyMax ?? def.settings.povertyMax;
+      st.settings.reminders = st.settings.reminders || def.settings.reminders;
+      st.settings.reminders.lastFired = st.settings.reminders.lastFired || {};
+      st.settings.visuals = st.settings.visuals || def.settings.visuals;
+      st.settings.custom = st.settings.custom || def.settings.custom;
+      st.settings.custom.headerSubText = st.settings.custom.headerSubText ?? def.settings.custom.headerSubText;
+      st.settings.custom.branchesMeta = st.settings.custom.branchesMeta || def.settings.custom.branchesMeta;
+      st.settings.custom.ranks = Array.isArray(st.settings.custom.ranks) ? st.settings.custom.ranks : def.settings.custom.ranks;
+      st.settings.custom.povertyRules = st.settings.custom.povertyRules || def.settings.custom.povertyRules;
+      st.settings.custom.contentTargets = st.settings.custom.contentTargets || def.settings.custom.contentTargets;
+
+      st.xpTotal = st.xpTotal ?? 0;
+      st.branches = st.branches || def.branches;
+      ["Capital","Mind","Influence","Body","Style"].forEach(k=>{ if(st.branches[k]==null) st.branches[k]=0; });
+
+      st.streak = st.streak ?? 0;
+      st.lastStreakDate = st.lastStreakDate ?? null;
+      st.poverty = st.poverty ?? 0;
+
+      st.content = st.content || def.content;
+      st.content.tiktokDoneOn = st.content.tiktokDoneOn || {};
+      st.content.telegramCountByWeek = st.content.telegramCountByWeek || {};
+      st.content.youtubeCountByMonth = st.content.youtubeCountByMonth || {};
+
+      st.focus = st.focus || def.focus;
+      st.focus.sessionsDoneOn = st.focus.sessionsDoneOn || {};
+      st.focus.totalSessions = st.focus.totalSessions ?? 0;
+
+      st.daily = st.daily || [];
+      if(st.daily.length === 0) seedBaseDailies(st);
+      st.daily.forEach(t=>{ t.id=t.id||uuid(); t.doneOn=t.doneOn||{}; t.schedule=t.schedule||"always"; });
+
+      st.quests = st.quests || [];
+      st.quests.forEach(t=>{ t.id=t.id||uuid(); t.done=!!t.done; });
+
+      st.debuffsByDate = st.debuffsByDate || {};
+      st.ideas = st.ideas || [];
+
+      st.goals = st.goals || [];
+      if(st.goals.length === 0) seedBaseGoals(st);
+      st.goals.forEach(g=>{
+        g.id=g.id||uuid();
+        g.current = g.current ?? 0;
+        g.target = g.target ?? 0;
+        g.unit = g.unit ?? "";
+        g.deadline = g.deadline ?? "";
+        g.note = g.note ?? "";
+      });
+
+      return st;
+    }catch(e){
+      const st = defaultState();
+      seedBaseDailies(st);
+      seedBaseGoals(st);
+      return st;
+    }
+  }
+
+  let state = load();
+  const save = ()=> localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+
+  function isTaskActiveToday(task){
+    const d = dow();
+    if(task.schedule === "always") return true;
+    if(task.schedule === "mwf") return (d===1 || d===3 || d===5);
+    if(task.schedule === "sun") return (d===0);
+    return true;
+  }
+  function isDailyDone(task){ return !!task.doneOn[todayKey()]; }
+  function setDailyDone(task, done){
+    if(done) task.doneOn[todayKey()] = true;
+    else delete task.doneOn[todayKey()];
+  }
+
+  function applyXP(branch, amount){
+    state.xpTotal += amount;
+    state.branches[branch] = (state.branches[branch] ?? 0) + amount;
+  }
+  function rollbackXP(branch, amount){
+    state.xpTotal = Math.max(0, state.xpTotal - amount);
+    state.branches[branch] = Math.max(0, (state.branches[branch] ?? 0) - amount);
+  }
+
+  function levelFromXP(xp){
+    const per = state.settings.xpPerLevel;
+    const lvl = Math.floor(xp / per) + 1;
+    const inLevel = xp % per;
+    const toNext = per - inLevel;
+    const pct = (inLevel / per) * 100;
+    return { lvl, inLevel, toNext, pct };
+  }
+
+  function countDailyDoneToday(){
+    return state.daily.reduce((acc,t)=> acc + ((isTaskActiveToday(t) && isDailyDone(t)) ? 1 : 0), 0);
+  }
+  function countDailyActiveToday(){
+    return state.daily.reduce((acc,t)=> acc + (isTaskActiveToday(t) ? 1 : 0), 0);
+  }
+  function hasDebuffsToday(){
+    const list = state.debuffsByDate[todayKey()] || [];
+    return list.length > 0;
+  }
+  function capitalDailyDoneToday(){
+    const cap = state.daily.find(t => t.branch === "Capital" && isTaskActiveToday(t));
+    return cap ? isDailyDone(cap) : false;
+  }
+  function adjustPoverty(delta){
+    const max = state.settings.povertyMax;
+    state.poverty = clamp((state.poverty ?? 0) + delta, 0, max);
+  }
+
+  function updateStreakOnDayFinalize(){
+    const today = todayKey();
+    const done = countDailyDoneToday();
+    const need = state.settings.dailyMin;
+    if(done >= need && state.lastStreakDate !== today){
+      if(!state.lastStreakDate){
+        state.streak = 1;
+      } else {
+        const last = new Date(state.lastStreakDate);
+        const now = new Date(today);
+        const diffDays = Math.round((now - last) / 86400000);
+        if(diffDays === 1) state.streak += 1;
+        else if(diffDays > 1) state.streak = 1;
+      }
+      state.lastStreakDate = today;
+    }
+  }
+
+  function contentResetIfNeeded(){
+    const wk = weekKey(new Date());
+    if(state.content.telegramCountByWeek[wk] == null) state.content.telegramCountByWeek[wk] = 0;
+    const mk = monthKey(new Date());
+    if(state.content.youtubeCountByMonth[mk] == null) state.content.youtubeCountByMonth[mk] = 0;
+  }
+
+  function computeBadges(){
+    const tkDone = !!state.content.tiktokDoneOn[todayKey()];
+    const ct = state.settings.custom.contentTargets || {tiktokPerDay:1,tgPerWeek:2,ytPerMonth:2};
+    const tiktokText = `🎥 TikTok: ${tkDone ? 1 : 0}/${ct.tiktokPerDay ?? 1}`;
+    const wk = weekKey(new Date());
+    const tg = state.content.telegramCountByWeek[wk] ?? 0;
+    const tgText = `✍️ Telegram: ${tg}/${ct.tgPerWeek ?? 2} (неделя)`;
+    const mk = monthKey(new Date());
+    const yt = state.content.youtubeCountByMonth[mk] ?? 0;
+    const ytText = `▶️ YouTube: ${yt}/${ct.ytPerMonth ?? 2} (месяц)`;
+    return { tkDone, tiktokText, tg, tgText, yt, ytText };
+  }
+
+  function beep(){
+    try{
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.type = "sine"; o.frequency.value = 880;
+      g.gain.value = 0.02;
+      o.connect(g); g.connect(ctx.destination);
+      o.start();
+      setTimeout(()=>{ o.stop(); ctx.close(); }, 200);
+    }catch(e){}
+  }
+
+  // Timer
+  let timer = { remainingSec: 30*60, running:false, interval:null, lastTick:null };
+  function formatTime(sec){
+    sec = Math.max(0, sec);
+    const m = Math.floor(sec/60);
+    const s = sec%60;
+    return `${pad2(m)}:${pad2(s)}`;
+  }
+  function timerRender(){
+    $("timerTime").textContent = formatTime(timer.remainingSec);
+    $("timerState").textContent = timer.running ? "Идёт фокус" : "Готов";
+  }
+  function timerStop(){
+    timer.running = false;
+    if(timer.interval) clearInterval(timer.interval);
+    timer.interval = null;
+    timer.lastTick = null;
+    timerRender();
+  }
+  function onFocusCompleted(){
+    const xp = state.settings.focusXP;
+    applyXP("Capital", xp);
+
+    const tk = todayKey();
+    state.focus.sessionsDoneOn[tk] = (state.focus.sessionsDoneOn[tk] ?? 0) + 1;
+    state.focus.totalSessions = (state.focus.totalSessions ?? 0) + 1;
+
+    const pr = state.settings.custom.povertyRules || {onFocus:-1};
+    const delta = Number(pr.onFocus ?? -1);
+    if(delta !== 0){
+      if(delta < 0){ if((state.poverty ?? 0) > 0) adjustPoverty(delta); }
+      else adjustPoverty(delta);
+    }
+
+    save(); render();
+    beep();
+    toast(`Фокус завершён: +${xp} XP (Capital)`);
+  }
+  function timerStart(){
+    if(timer.running) return;
+    timer.running = true;
+    timer.lastTick = Date.now();
+    timer.interval = setInterval(()=>{
+      const now = Date.now();
+      const elapsed = Math.floor((now - timer.lastTick)/1000);
+      if(elapsed > 0){
+        timer.remainingSec -= elapsed;
+        timer.lastTick = now;
+        if(timer.remainingSec <= 0){
+          timer.remainingSec = 0;
+          timerStop();
+          onFocusCompleted();
+        }
+        timerRender();
+      }
+    }, 250);
+    timerRender();
+  }
+
+  function parseHHMM(s){
+    const m = /^(\d{1,2}):(\d{2})$/.exec((s||"").trim());
+    if(!m) return null;
+    const hh = clamp(parseInt(m[1],10), 0, 23);
+    const mm = clamp(parseInt(m[2],10), 0, 59);
+    return { key: `${pad2(hh)}:${pad2(mm)}` };
+  }
+  function remindersTick(){
+    const r = state.settings.reminders;
+    if(!r.enabled) return;
+
+    const now = new Date();
+    const key = todayKey();
+    const nowKey = `${pad2(now.getHours())}:${pad2(now.getMinutes())}`;
+
+    const t1 = parseHHMM(r.t1);
+    const t2 = parseHHMM(r.t2);
+    const targets = [t1?.key, t2?.key].filter(Boolean);
+
+    const firedKey = `${key}_${nowKey}`;
+    if(targets.includes(nowKey) && !r.lastFired[firedKey]){
+      r.lastFired[firedKey] = true;
+
+      const done = countDailyDoneToday();
+      const need = state.settings.dailyMin;
+      const capDone = capitalDailyDoneToday();
+      const tkDone = !!state.content.tiktokDoneOn[key];
+
+      let msg = `Напоминание: дейли ${done}/${need}.`;
+      if(!capDone) msg += ` Деньги не сделаны.`;
+      if(!tkDone) msg += ` TikTok ещё нет.`;
+
+      toast(msg);
+      beep();
+      save();
+      render();
+    }
+  }
+
+  function renderPoverty(){
+    $("povertyLevel").textContent = state.poverty ?? 0;
+    const max = state.settings.povertyMax;
+    const pips = $("povertyPips");
+    pips.innerHTML = "";
+    for(let i=1;i<=max;i++){
+      const d = document.createElement("div");
+      d.className = "pip" + ((state.poverty ?? 0) >= i ? " on" : "");
+      pips.appendChild(d);
+    }
+  }
+
+  function taskRow(task, mode){
+    const el = document.createElement("div");
+    el.className = "task";
+
+    const left = document.createElement("div");
+    left.className = "left";
+
+    const chk = document.createElement("div");
+    chk.className = "chk";
+    const activeToday = (task.type === "daily") ? isTaskActiveToday(task) : true;
+
+    const done = task.type === "daily" ? isDailyDone(task) : !!task.done;
+    if(done) chk.classList.add("done");
+    chk.innerHTML = `<span>${done ? "✓" : ""}</span>`;
+    if(task.type==="daily" && !activeToday){
+      chk.style.opacity = "0.35";
+      chk.style.cursor = "not-allowed";
+    }
+
+    const meta = document.createElement("div");
+    meta.className = "meta";
+
+    const title = document.createElement("div");
+    title.className = "t";
+    title.textContent = task.title;
+
+    const desc = document.createElement("div");
+    desc.className = "d";
+    desc.textContent = task.desc || "";
+
+    const tags = document.createElement("div");
+    tags.className = "tags";
+    const tagType = document.createElement("div");
+    tagType.className = "tag";
+    tagType.textContent = task.type.toUpperCase();
+    const tagBranch = document.createElement("div");
+    tagBranch.className = "tag";
+    tagBranch.textContent = (getBranchMeta(task.branch).icon ? (getBranchMeta(task.branch).icon + " ") : "") + getBranchMeta(task.branch).name;
+    tags.appendChild(tagType);
+    tags.appendChild(tagBranch);
+
+    if(task.type==="daily"){
+      const tagSched = document.createElement("div");
+      tagSched.className = "tag";
+      const s = task.schedule || "always";
+      tagSched.textContent = (s==="always") ? "ЕЖЕДН." : (s==="mwf") ? "ПН/СР/ПТ" : (s==="sun") ? "ВС" : s;
+      tags.appendChild(tagSched);
+    }
+
+    meta.appendChild(title);
+    if(task.desc) meta.appendChild(desc);
+    meta.appendChild(tags);
+
+    left.appendChild(chk);
+    left.appendChild(meta);
+
+    const right = document.createElement("div");
+    right.className = "right";
+
+    const xp = document.createElement("div");
+    xp.className = "xp";
+    xp.textContent = `+${task.xp} XP`;
+    right.appendChild(xp);
+
+    const del = document.createElement("button");
+    del.textContent = "Удалить";
+    del.style.padding = "7px 9px";
+    del.style.borderRadius = "12px";
+    del.style.fontSize = "12px";
+    del.style.opacity = "0.92";
+    del.onclick = () => {
+      if(task.type === "daily"){
+        const orig = state.daily.find(x=>x.id===task.id);
+        if(orig && isDailyDone(orig)){
+          setDailyDone(orig, false);
+          rollbackXP(orig.branch, orig.xp);
+        }
+        state.daily = state.daily.filter(x=>x.id!==task.id);
+      } else {
+        const orig = state.quests.find(x=>x.id===task.id);
+        if(orig && orig.done) rollbackXP(orig.branch, orig.xp);
+        state.quests = state.quests.filter(x=>x.id!==task.id);
+      }
+      save(); render();
+      toast("Удалено");
+    };
+    if(mode !== "today"){
+      const edit = document.createElement("button");
+      edit.textContent = "Редактировать";
+      edit.style.padding = "7px 9px";
+      edit.style.borderRadius = "12px";
+      edit.style.fontSize = "12px";
+      edit.style.opacity = "0.92";
+      edit.onclick = (ev) => {
+        ev.stopPropagation();
+        const branches = ["Capital","Mind","Influence","Body","Style"];
+        if(task.type === "daily"){
+          const orig = state.daily.find(x=>x.id===task.id);
+          if(!orig) return;
+          const title = prompt("Название", orig.title);
+          if(title == null) return;
+          orig.title = title.trim() || orig.title;
+          const desc = prompt("Описание (можно пусто)", orig.desc || "");
+          if(desc != null) orig.desc = desc.trim();
+          const xp = prompt("XP (число)", String(orig.xp));
+          if(xp != null){ const n = parseInt(xp,10); if(!Number.isNaN(n) && n>0) orig.xp = n; }
+          const br = prompt("Ветка (Capital/Mind/Influence/Body/Style)", orig.branch);
+          if(br != null){ const b = br.trim(); if(branches.includes(b)) orig.branch = b; }
+          const sch = prompt("Расписание (always/mwf/sun)", orig.schedule || "always");
+          if(sch != null){ const s = sch.trim(); if(["always","mwf","sun"].includes(s)) orig.schedule = s; }
+        } else {
+          const orig = state.quests.find(x=>x.id===task.id);
+          if(!orig) return;
+          const title = prompt("Название", orig.title);
+          if(title == null) return;
+          orig.title = title.trim() || orig.title;
+          const desc = prompt("Описание (можно пусто)", orig.desc || "");
+          if(desc != null) orig.desc = desc.trim();
+          const xp = prompt("XP (число)", String(orig.xp));
+          if(xp != null){ const n = parseInt(xp,10); if(!Number.isNaN(n) && n>0) orig.xp = n; }
+          const br = prompt("Ветка (Capital/Mind/Influence/Body/Style)", orig.branch);
+          if(br != null){ const b = br.trim(); if(branches.includes(b)) orig.branch = b; }
+        }
+        save(); render();
+        toast("Сохранено");
+      };
+      right.appendChild(edit);
+      right.appendChild(del);
+    }
+
+    chk.onclick = () => {
+      if(task.type === "daily"){
+        const orig = state.daily.find(x=>x.id===task.id);
+        if(!orig) return;
+        if(!isTaskActiveToday(orig)) return;
+
+        const was = isDailyDone(orig);
+        if(was){
+          setDailyDone(orig, false);
+          rollbackXP(orig.branch, orig.xp);
+          toast("Отменено");
+        } else {
+          setDailyDone(orig, true);
+          applyXP(orig.branch, orig.xp);
+          toast("Засчитано");
+        }
+      } else {
+        const orig = state.quests.find(x=>x.id===task.id);
+        if(!orig) return;
+        if(orig.done){
+          orig.done = false;
+          rollbackXP(orig.branch, orig.xp);
+          toast("Отменено");
+        } else {
+          orig.done = true;
+          applyXP(orig.branch, orig.xp);
+          toast("Засчитано");
+        }
+      }
+      save(); render();
+    };
+
+    el.appendChild(left);
+    el.appendChild(right);
+    return el;
+  }
+
+  function renderTodayList(){
+    const list = $("todayList");
+    list.innerHTML = "";
+    const priority = ["Capital","Mind","Influence","Body","Style"];
+    const activeDailies = state.daily
+      .filter(t => isTaskActiveToday(t))
+      .sort((a,b)=> priority.indexOf(a.branch) - priority.indexOf(b.branch));
+    activeDailies.forEach(t => list.appendChild(taskRow(t, "today")));
+  }
+
+  function renderDailyAndQuests(){
+    const dl = $("dailyList");
+    dl.innerHTML = "";
+    state.daily.forEach(t => dl.appendChild(taskRow(t, "daily")));
+
+    const ql = $("questList");
+    ql.innerHTML = "";
+    if(state.quests.length === 0){
+      const empty = document.createElement("div");
+      empty.className = "muted";
+      empty.textContent = "Quests пусты. Добавь справа.";
+      ql.appendChild(empty);
+    } else {
+      state.quests.forEach(t => ql.appendChild(taskRow(t, "quest")));
+    }
+  }
+
+  // Ideas modal
+  let openIdeaId = null;
+  function openIdeaModal(ideaId){
+    const it = state.ideas.find(x=>x.id===ideaId);
+    if(!it) return;
+    openIdeaId = ideaId;
+    $("ideaModalPlatform").value = it.platform;
+    $("ideaModalStatus").value = it.status;
+    $("ideaModalText").value = it.text;
+    const dt = new Date(it.updatedAt || it.createdAt);
+    $("ideaModalMeta").textContent = `ID: ${it.id} • Обновлено: ${dt.toLocaleString()}`;
+    $("ideaModalBack").classList.add("show");
+  }
+  function closeIdeaModal(){
+    openIdeaId = null;
+    $("ideaModalBack").classList.remove("show");
+  }
+
+  function renderIdeas(){
+    const list = $("ideaList");
+    list.innerHTML = "";
+
+    const fp = $("filterPlatform").value;
+    const fs = $("filterStatus").value;
+
+    const items = state.ideas
+      .slice()
+      .sort((a,b)=> (b.updatedAt||b.createdAt) - (a.updatedAt||a.createdAt))
+      .filter(it => (fp==="all" ? true : it.platform===fp))
+      .filter(it => (fs==="all" ? true : it.status===fs));
+
+    if(items.length === 0){
+      const empty = document.createElement("div");
+      empty.className = "muted";
+      empty.textContent = "Пока пусто.";
+      list.appendChild(empty);
+      return;
+    }
+
+    items.forEach(it=>{
+      const el = document.createElement("div");
+      el.className = "task";
+      el.style.cursor = "pointer";
+
+      const left = document.createElement("div");
+      left.className = "left";
+
+      const meta = document.createElement("div");
+      meta.className = "meta";
+
+      const title = document.createElement("div");
+      title.className = "t";
+      title.textContent = it.text.length > 90 ? it.text.slice(0,90) + "…" : it.text;
+
+      const desc = document.createElement("div");
+      desc.className = "d";
+      const dt = new Date(it.updatedAt || it.createdAt);
+      desc.textContent = `Обновлено: ${dt.toLocaleString()}`;
+
+      const tags = document.createElement("div");
+      tags.className = "tags";
+      const tagP = document.createElement("div"); tagP.className="tag"; tagP.textContent = it.platform;
+      const tagS = document.createElement("div"); tagS.className="tag";
+      tagS.textContent = (it.status==="idea") ? "Идея" : (it.status==="draft") ? "Черновик" : "Опубликовано";
+      tags.appendChild(tagP); tags.appendChild(tagS);
+
+      meta.appendChild(title);
+      meta.appendChild(desc);
+      meta.appendChild(tags);
+
+      left.appendChild(meta);
+
+      const right = document.createElement("div");
+      right.className = "right";
+
+      const edit = document.createElement("button");
+      edit.textContent = "Открыть";
+      edit.style.padding="7px 9px";
+      edit.style.borderRadius="12px";
+      edit.style.fontSize="12px";
+      edit.onclick = (ev)=>{ ev.stopPropagation(); openIdeaModal(it.id); };
+
+      right.appendChild(edit);
+
+      el.appendChild(left);
+      el.appendChild(right);
+
+      el.onclick = ()=> openIdeaModal(it.id);
+      list.appendChild(el);
+    });
+  }
+
+  // Goals modal
+  let openGoalId = null;
+  function openGoalModal(goalId){
+    const g = state.goals.find(x=>x.id===goalId);
+    if(!g) return;
+    openGoalId = goalId;
+
+    $("goalModalName").value = g.name || "";
+    $("goalModalUnit").value = g.unit || "";
+    $("goalModalCurrent").value = g.current ?? 0;
+    $("goalModalTarget").value = g.target ?? 0;
+    $("goalModalDeadline").value = g.deadline || "";
+    $("goalModalNote").value = g.note || "";
+
+    const dt = new Date(g.updatedAt || g.createdAt);
+    $("goalModalMeta").textContent = `ID: ${g.id} • Обновлено: ${dt.toLocaleString()}`;
+
+    $("goalModalBack").classList.add("show");
+  }
+  function closeGoalModal(){
+    openGoalId = null;
+    $("goalModalBack").classList.remove("show");
+  }
+
+  function goalBadgeByProgress(pct){
+    if(pct >= 100) return "badge ok";
+    if(pct >= 60) return "badge warn";
+    return "badge bad";
+  }
+
+  function renderGoals(){
+    const list = $("goalList");
+    list.innerHTML = "";
+
+    if(state.goals.length === 0){
+      const empty = document.createElement("div");
+      empty.className = "muted";
+      empty.textContent = "Целей нет.";
+      list.appendChild(empty);
+      return;
+    }
+
+    const items = state.goals.slice().sort((a,b)=> (a.deadline||"").localeCompare(b.deadline||"") );
+
+    items.forEach(g=>{
+      const el = document.createElement("div");
+      el.className = "task";
+      el.style.cursor = "pointer";
+
+      const left = document.createElement("div");
+      left.className = "left";
+
+      const meta = document.createElement("div");
+      meta.className = "meta";
+
+      const title = document.createElement("div");
+      title.className = "t";
+      title.textContent = g.name || "Без названия";
+
+      const desc = document.createElement("div");
+      desc.className = "d";
+      const cur = Number(g.current ?? 0);
+      const tar = Number(g.target ?? 0);
+      const unit = (g.unit || "").trim();
+      const pct = tar > 0 ? Math.round((cur / tar) * 100) : 0;
+      const dl = g.deadline ? ` • дедлайн: ${g.deadline}` : "";
+      desc.textContent = `${cur}/${tar}${unit ? " " + unit : ""} • ${pct}%${dl}`;
+
+      const tags = document.createElement("div");
+      tags.className = "tags";
+      const tagP = document.createElement("span");
+      tagP.className = goalBadgeByProgress(pct);
+      tagP.textContent = `🎯 ${pct}%`;
+      tags.appendChild(tagP);
+
+      meta.appendChild(title);
+      meta.appendChild(desc);
+      meta.appendChild(tags);
+
+      left.appendChild(meta);
+
+      const right = document.createElement("div");
+      right.className = "right";
+
+      const open = document.createElement("button");
+      open.textContent = "Открыть";
+      open.style.padding="7px 9px";
+      open.style.borderRadius="12px";
+      open.style.fontSize="12px";
+      open.onclick = (ev)=>{ ev.stopPropagation(); openGoalModal(g.id); };
+
+      right.appendChild(open);
+
+      el.appendChild(left);
+      el.appendChild(right);
+      el.onclick = ()=> openGoalModal(g.id);
+      list.appendChild(el);
+    });
+  }
+
+  function renderDebuffs(){
+    const container = $("debuffList");
+    container.innerHTML = "";
+    const entries = [];
+    Object.keys(state.debuffsByDate || {}).forEach(date=>{
+      (state.debuffsByDate[date] || []).forEach(e=>{
+        entries.push({ date, ...e });
+      });
+    });
+    entries.sort((a,b)=> (b.ts||0) - (a.ts||0));
+
+    const last = entries.slice(0, 60);
+    if(last.length === 0){
+      const empty = document.createElement("div");
+      empty.className = "muted";
+      empty.textContent = "Журнал пуст.";
+      container.appendChild(empty);
+      return;
+    }
+
+    last.forEach(e=>{
+      const el = document.createElement("div");
+      el.className = "task";
+
+      const left = document.createElement("div");
+      left.className = "left";
+
+      const meta = document.createElement("div");
+      meta.className = "meta";
+
+      const title = document.createElement("div");
+      title.className = "t";
+      title.textContent = `${e.type} • ${e.date}`;
+
+      const desc = document.createElement("div");
+      desc.className = "d";
+      const dt = new Date(e.ts);
+      desc.textContent = `${dt.toLocaleString()}${e.note ? " • " + e.note : ""}`;
+
+      meta.appendChild(title);
+      meta.appendChild(desc);
+      left.appendChild(meta);
+
+      const right = document.createElement("div");
+      right.className = "right";
+
+      const del = document.createElement("button");
+      del.textContent = "Удалить";
+      del.style.padding="7px 9px";
+      del.style.borderRadius="12px";
+      del.style.fontSize="12px";
+      del.onclick = () => {
+        const arr = state.debuffsByDate[e.date] || [];
+        state.debuffsByDate[e.date] = arr.filter(x=>x.id!==e.id);
+        adjustPoverty(-1);
+        save(); render();
+        toast("Дэбаф удалён");
+      };
+
+      right.appendChild(del);
+
+      el.appendChild(left);
+      el.appendChild(right);
+      container.appendChild(el);
+    });
+  }
+
+  function renderRanks(){
+    const rl = $("rankList");
+    rl.innerHTML = "";
+    getRanks().forEach(r=>{
+      const el = document.createElement("div");
+      el.className = "task";
+      const left = document.createElement("div");
+      left.className = "left";
+      const meta = document.createElement("div");
+      meta.className = "meta";
+      const t = document.createElement("div");
+      t.className = "t";
+      t.textContent = `${r.icon} ${r.name}`;
+      const d = document.createElement("div");
+      d.className = "d";
+      d.textContent = `с уровня ${r.level}`;
+      meta.appendChild(t); meta.appendChild(d);
+      left.appendChild(meta);
+      el.appendChild(left);
+      rl.appendChild(el);
+    });
+  }
+
+  function renderHUD(){
+    $("todayPill").textContent = `📅 Сегодня: ${todayKey()}`;
+
+    const { lvl, toNext, pct } = levelFromXP(state.xpTotal);
+    $("level").textContent = lvl;
+    $("xpTotal").textContent = state.xpTotal;
+    $("toNext").textContent = toNext;
+    $("xpBar").style.width = `${clamp(pct,0,100)}%`;
+
+    const rank = getRank(lvl);
+    $("rankBadge").textContent = `${rank.icon} ${rank.name}`;
+
+    $("streak").textContent = state.streak ?? 0;
+
+    const done = countDailyDoneToday();
+    const active = countDailyActiveToday();
+    $("doneDaily").textContent = `${done}/${active}`;
+    $("dailyMin").textContent = state.settings.dailyMin;
+
+    $("bCapital").textContent = state.branches.Capital ?? 0;
+    $("bMind").textContent = state.branches.Mind ?? 0;
+    $("bBody").textContent = state.branches.Body ?? 0;
+    $("bInfluence").textContent = state.branches.Influence ?? 0;
+    $("bStyle").textContent = state.branches.Style ?? 0;
+
+    contentResetIfNeeded();
+    const b = computeBadges();
+    $("tiktokBadge").textContent = b.tiktokText;
+    $("tiktokBadge").className = "badge " + (b.tkDone ? "ok" : "warn");
+    $("tgBadge").textContent = b.tgText;
+    $("tgBadge").className = "badge " + (b.tg >= 2 ? "ok" : "warn");
+    $("ytBadge").textContent = b.ytText;
+    $("ytBadge").className = "badge " + (b.yt >= 2 ? "ok" : "warn");
+
+    const tk = todayKey();
+    const sessToday = state.focus.sessionsDoneOn[tk] ?? 0;
+    $("focusCountBadge").textContent = `Сессии: ${sessToday}`;
+    $("focusXPBadge").textContent = `+${(sessToday * state.settings.focusXP)} XP (фокус)`;
+
+    $("rem1").value = state.settings.reminders.t1 || "13:00";
+    $("rem2").value = state.settings.reminders.t2 || "20:00";
+    $("remStateBadge").textContent = state.settings.reminders.enabled ? "🔔 Вкл" : "🔕 Выкл";
+
+    renderPoverty();
+  }
+
+  function applyVisuals(){
+    const v = state.settings.visuals;
+    document.documentElement.style.setProperty("--bgDim", String(v.dim));
+    document.documentElement.style.setProperty("--bgBlur", `${v.blurPx}px`);
+    document.documentElement.style.setProperty("--sakuraOpacity", String(v.sakura));
+
+    const layer = $("bgLayer");
+    if(v.bgDataUrl){
+      layer.style.backgroundImage = `url("${v.bgDataUrl}")`;
+      layer.style.display = "block";
+    } else {
+      layer.style.backgroundImage = "none";
+      layer.style.display = "none";
+    }
+
+    $("bgDimInput").value = v.dim;
+    $("bgBlurInput").value = v.blurPx;
+    $("sakuraInput").value = v.sakura;
+  }
+
+  function finalizeDayEffects(){
+    updateStreakOnDayFinalize();
+
+    const pr = state.settings.custom.povertyRules || { onFailDay:1, onMissCapital:1, onCleanDay:-1 };
+    const done = countDailyDoneToday();
+    const need = state.settings.dailyMin;
+
+    if(done >= need){
+      if(!capitalDailyDoneToday()) adjustPoverty(Number(pr.onMissCapital ?? 1));
+      if(!hasDebuffsToday()){
+        const delta = Number(pr.onCleanDay ?? -1);
+        if(delta !== 0){
+          if(delta < 0){ if((state.poverty ?? 0) > 0) adjustPoverty(delta); }
+          else adjustPoverty(delta);
+        }
+      }
+    } else {
+      adjustPoverty(Number(pr.onFailDay ?? 1));
+    }
+  }
+
+  function addDebuff(){
+    const type = prompt("Дэбаф: алкоголь / сигареты / соцсети / обман / безделье", "соцсети");
+    if(type == null) return;
+    const t = type.trim();
+    if(!t) return;
+
+    const note = prompt("Комментарий (необязательно):", "");
+    const entry = { id: uuid(), type: t, note: (note||"").trim(), ts: Date.now() };
+    const key = todayKey();
+    if(!state.debuffsByDate[key]) state.debuffsByDate[key] = [];
+    state.debuffsByDate[key].push(entry);
+
+    const pr = state.settings.custom.povertyRules || {onDebuff:1};
+    adjustPoverty(Number(pr.onDebuff ?? 1));
+
+    save(); render();
+    toast("+ Дэбаф");
+  }
+
+  function addIdea(){
+    const text = $("ideaText").value.trim();
+    if(!text){ toast("Текст идеи пуст"); return; }
+    const platform = $("ideaPlatform").value;
+    const status = $("ideaStatus").value;
+    state.ideas.unshift({
+      id: uuid(), platform, status, text,
+      createdAt: Date.now(), updatedAt: Date.now()
+    });
+    $("ideaText").value = "";
+    save(); render();
+    toast("Идея добавлена");
+  }
+
+  function contentAddTikTok(){ state.content.tiktokDoneOn[todayKey()] = true; save(); render(); toast("TikTok засчитан"); }
+  function contentAddTG(){
+    const wk = weekKey(new Date());
+    state.content.telegramCountByWeek[wk] = (state.content.telegramCountByWeek[wk] ?? 0) + 1;
+    save(); render(); toast("Telegram +1");
+  }
+  function contentAddYT(){
+    const mk = monthKey(new Date());
+    state.content.youtubeCountByMonth[mk] = (state.content.youtubeCountByMonth[mk] ?? 0) + 1;
+    save(); render(); toast("YouTube +1");
+  }
+
+  function addGoal(){
+    const name = $("goalName").value.trim();
+    if(!name){ toast("Название цели пустое"); return; }
+    const unit = $("goalUnit").value.trim();
+    const current = Math.max(0, Number($("goalCurrent").value || 0));
+    const target = Math.max(0, Number($("goalTarget").value || 0));
+    const deadline = $("goalDeadline").value || "";
+    const note = $("goalNote").value.trim();
+
+    state.goals.unshift({
+      id: uuid(), name, unit, current, target, deadline, note,
+      createdAt: Date.now(), updatedAt: Date.now()
+    });
+
+    $("goalName").value = "";
+    $("goalUnit").value = "";
+    $("goalCurrent").value = 0;
+    $("goalTarget").value = 100;
+    $("goalDeadline").value = "";
+    $("goalNote").value = "";
+
+    save(); render();
+    toast("Цель добавлена");
+  }
+
+  function setTab(name){
+    document.querySelectorAll(".tab").forEach(t=>{
+      t.classList.toggle("active", t.dataset.tab === name);
+    });
+    ["dash","missions","ideas","goals","stats","settings"].forEach(k=>{
+      const el = document.getElementById("tab-" + k);
+      el.classList.toggle("hidden", k !== name);
+    });
+  }
+
+  function renderSettingsInputs(){
+    $("xpPerLevel").value = state.settings.xpPerLevel;
+    $("dailyMinInput").value = state.settings.dailyMin;
+    $("focusXP").value = state.settings.focusXP;
+    $("povertyMax").value = state.settings.povertyMax;
+  }
+
+  function renderCustomInputs(){
+    // header
+    const hs = $("headerSubText");
+    if(hs) hs.innerHTML = state.settings.custom.headerSubText || hs.innerHTML;
+    $("headerTextInput").value = state.settings.custom.headerSubText || "";
+
+    // branches editor
+    const ids = ["Capital","Mind","Influence","Body","Style"];
+    const list = $("branchEditList");
+    list.innerHTML = "";
+    ids.forEach(id=>{
+      const bm = state.settings.custom.branchesMeta?.[id] || {icon:"", name:id};
+
+      const row = document.createElement("div");
+      row.className = "task";
+
+      const left = document.createElement("div");
+      left.className = "left";
+      const meta = document.createElement("div");
+      meta.className = "meta";
+      const t = document.createElement("div"); t.className="t"; t.textContent = id;
+      const d = document.createElement("div"); d.className="d"; d.textContent = "Отображение";
+      meta.appendChild(t); meta.appendChild(d);
+      left.appendChild(meta);
+
+      const right = document.createElement("div");
+      right.className = "right";
+      right.style.width = "min(520px, 100%)";
+      const g = document.createElement("div");
+      g.className = "grid2";
+
+      const icon = document.createElement("input");
+      icon.value = bm.icon || "";
+      icon.placeholder = "Иконка (💰)";
+      icon.dataset.branch = id;
+      icon.dataset.field = "icon";
+
+      const name = document.createElement("input");
+      name.value = bm.name || id;
+      name.placeholder = "Название";
+      name.dataset.branch = id;
+      name.dataset.field = "name";
+
+      g.appendChild(icon);
+      g.appendChild(name);
+      right.appendChild(g);
+
+      row.appendChild(left);
+      row.appendChild(right);
+      list.appendChild(row);
+    });
+
+    // ranks editor
+    const rlist = $("rankEditList");
+    rlist.innerHTML = "";
+    const ranks = getRanks().slice().sort((a,b)=> (a.level||0)-(b.level||0));
+    ranks.forEach((r, idx)=>{
+      const row = document.createElement("div");
+      row.className = "task";
+
+      const left = document.createElement("div");
+      left.className = "left";
+      const meta = document.createElement("div");
+      meta.className = "meta";
+      const t = document.createElement("div"); t.className="t"; t.textContent = `#${idx+1}`;
+      const d = document.createElement("div"); d.className="d"; d.textContent = "level / icon / name";
+      meta.appendChild(t); meta.appendChild(d);
+      left.appendChild(meta);
+
+      const right = document.createElement("div");
+      right.className = "right";
+      right.style.width = "min(520px, 100%)";
+
+      const level = document.createElement("input");
+      level.type = "number"; level.min="1"; level.value = r.level ?? 1;
+      level.dataset.rank = String(idx); level.dataset.field = "level";
+
+      const icon = document.createElement("input");
+      icon.value = r.icon || ""; icon.placeholder="Иконка";
+      icon.dataset.rank = String(idx); icon.dataset.field = "icon";
+
+      const name = document.createElement("input");
+      name.value = r.name || ""; name.placeholder="Название";
+      name.dataset.rank = String(idx); name.dataset.field = "name";
+
+      const grid = document.createElement("div");
+      grid.style.display = "grid";
+      grid.style.gridTemplateColumns = "1fr 1fr";
+      grid.style.gap = "10px";
+      grid.appendChild(level);
+      grid.appendChild(icon);
+
+      const full = document.createElement("div");
+      full.style.marginTop = "10px";
+      full.appendChild(name);
+
+      right.appendChild(grid);
+      right.appendChild(full);
+
+      const del = document.createElement("button");
+      del.textContent = "Удалить";
+      del.className = "danger";
+      del.style.padding = "7px 9px";
+      del.style.borderRadius = "12px";
+      del.style.fontSize = "12px";
+      del.onclick = (ev)=>{ ev.stopPropagation(); ranks.splice(idx,1); state.settings.custom.ranks = ranks; save(); render(); toast("Ранг удалён"); };
+
+      row.appendChild(left);
+      row.appendChild(right);
+      row.appendChild(del);
+      rlist.appendChild(row);
+    });
+
+    // rules + targets
+    const pr = state.settings.custom.povertyRules || {};
+    $("prDebuff").value = pr.onDebuff ?? 1;
+    $("prFailDay").value = pr.onFailDay ?? 1;
+    $("prMissCapital").value = pr.onMissCapital ?? 1;
+    $("prCleanDay").value = pr.onCleanDay ?? -1;
+    $("prFocus").value = pr.onFocus ?? -1;
+
+    const ct = state.settings.custom.contentTargets || {};
+    $("ctTikTok").value = ct.tiktokPerDay ?? 1;
+    $("ctTG").value = ct.tgPerWeek ?? 2;
+    $("ctYT").value = ct.ytPerMonth ?? 2;
+  }
+
+  function render(){
+    renderTodayList();
+    renderDailyAndQuests();
+    renderIdeas();
+    renderGoals();
+    renderDebuffs();
+    renderHUD();
+    renderRanks();
+    renderSettingsInputs();
+    renderCustomInputs();
+    timerRender();
+    applyVisuals();
+  }
+
+  // ===== INIT UI =====
+  document.querySelectorAll(".tab").forEach(t=>{ t.onclick = ()=> setTab(t.dataset.tab); });
+
+  $("newDayBtn").onclick = () => {
+    const ok = confirm("Новый день: применить правила (НИЩЕТА/чистый день/капитал/провал) и идти дальше?");
+    if(!ok) return;
+    finalizeDayEffects();
+    save(); render();
+    toast("Новый день начат");
+  };
+
+  $("exportBtn").onclick = async () => {
+    const data = JSON.stringify(state, null, 2);
+    try{ await navigator.clipboard.writeText(data); toast("JSON скопирован"); }
+    catch(e){ prompt("Скопируй JSON:", data); }
+  };
+
+  $("importBtn").onclick = () => {
+    const txt = prompt("Вставь JSON сюда:");
+    if(!txt) return;
+    try{
+      const obj = JSON.parse(txt);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(obj));
+      state = load();
+      save(); render();
+      toast("Импортировано");
+    }catch(e){ toast("Ошибка JSON"); }
+  };
+
+  $("wipeBtn").onclick = () => {
+    const ok = confirm("Сбросить ВСЁ (XP, миссии, идеи, цели, НИЩЕТА, трекеры)?");
+    if(!ok) return;
+    state = defaultState();
+    seedBaseDailies(state);
+    seedBaseGoals(state);
+    save(); render();
+    toast("Сброшено");
+  };
+
+  $("seedBtn").onclick = () => {
+    const ok = confirm("Вернуть базовые дейли (заменит текущие дейли)?");
+    if(!ok) return;
+    seedBaseDailies(state);
+    save(); render();
+    toast("Базовые дейли восстановлены");
+  };
+
+  $("addTikTokBtn").onclick = contentAddTikTok;
+  $("addTGBtn").onclick = contentAddTG;
+  $("addYTBtn").onclick = contentAddYT;
+
+  $("addDebuffBtn").onclick = addDebuff;
+  $("viewDebuffsBtn").onclick = ()=> setTab("stats");
+  $("reducePovertyBtn").onclick = () => {
+    if((state.poverty ?? 0) <= 0){ toast("НИЩЕТА уже 0"); return; }
+    adjustPoverty(-1); save(); render(); toast("НИЩЕТА -1");
+  };
+
+  $("addTaskBtn").onclick = () => {
+    const title = $("newTitle").value.trim();
+    const type = $("newType").value;
+    const branch = $("newBranch").value;
+    const xp = Math.max(1, parseInt($("newXP").value || "10", 10));
+    const desc = $("newDesc").value.trim();
+    const sched = $("newSched").value;
+
+    if(!title){ toast("Название пустое"); return; }
+
+    if(type === "daily"){
+      state.daily.push({ id: uuid(), type:"daily", title, branch, xp, desc, schedule: sched || "always", doneOn:{} });
+    } else {
+      state.quests.unshift({ id: uuid(), type:"quest", title, branch, xp, desc, done:false });
+    }
+
+    $("newTitle").value = "";
+    $("newDesc").value = "";
+    save(); render();
+    toast("Добавлено");
+  };
+
+  $("addIdeaBtn").onclick = addIdea;
+  $("clearIdeaBtn").onclick = ()=> $("ideaText").value = "";
+  $("filterPlatform").onchange = ()=> renderIdeas();
+  $("filterStatus").onchange = ()=> renderIdeas();
+
+  $("addGoalBtn").onclick = addGoal;
+  $("clearGoalBtn").onclick = () => {
+    $("goalName").value = ""; $("goalUnit").value = "";
+    $("goalCurrent").value = 0; $("goalTarget").value = 100;
+    $("goalDeadline").value = ""; $("goalNote").value = "";
+  };
+
+  $("timerStartBtn").onclick = () => { timer.remainingSec = 30*60; timerStart(); };
+  $("timerPauseBtn").onclick = () => { if(timer.running){ timerStop(); toast("Пауза"); } else { timerStart(); toast("Продолжить"); } };
+  $("timerResetBtn").onclick = () => { timerStop(); timer.remainingSec = 30*60; timerRender(); toast("Сброшено"); };
+
+  $("saveRemBtn").onclick = () => {
+    const t1 = parseHHMM($("rem1").value) || { key:"13:00" };
+    const t2 = parseHHMM($("rem2").value) || { key:"20:00" };
+    state.settings.reminders.t1 = t1.key;
+    state.settings.reminders.t2 = t2.key;
+    state.settings.reminders.enabled = true;
+    save(); render();
+    toast("Напоминания сохранены");
+  };
+  $("testRemBtn").onclick = () => { toast("Тест: держи линию денег/разума/контента."); beep(); };
+
+  $("saveSettingsBtn").onclick = () => {
+    state.settings.xpPerLevel = Math.max(10, parseInt($("xpPerLevel").value || "100", 10));
+    state.settings.dailyMin = clamp(parseInt($("dailyMinInput").value || "3", 10), 1, 5);
+    state.settings.focusXP = Math.max(1, parseInt($("focusXP").value || "20", 10));
+    state.settings.povertyMax = clamp(parseInt($("povertyMax").value || "5", 10), 3, 10);
+    state.poverty = clamp(state.poverty ?? 0, 0, state.settings.povertyMax);
+
+    $("savedBadge").textContent = "✅ Сохранено";
+    setTimeout(()=> $("savedBadge").textContent = "⚙️ Готово", 1200);
+
+    save(); render();
+    toast("Настройки сохранены");
+
+  $("addRankRowBtn").onclick = () => {
+    const ranks = getRanks().slice();
+    ranks.push({ level: Math.max(1, Math.round(getLevelFromXP(state.xp) + 1)), name: "Новый ранг", icon:"✨" });
+    state.settings.custom.ranks = ranks;
+    save(); render();
+    toast("Ранг добавлен");
+  };
+
+  $("saveCustomBtn").onclick = () => {
+    // header
+    state.settings.custom.headerSubText = $("headerTextInput").value.trim() || state.settings.custom.headerSubText;
+
+    // branches
+    const inputs = Array.from(document.querySelectorAll("#branchEditList input"));
+    inputs.forEach(inp=>{
+      const id = inp.dataset.branch;
+      const field = inp.dataset.field;
+      if(!id || !field) return;
+      state.settings.custom.branchesMeta[id] = state.settings.custom.branchesMeta[id] || { icon:"", name:id };
+      state.settings.custom.branchesMeta[id][field] = (inp.value || "").trim();
+      if(field === "name" && !state.settings.custom.branchesMeta[id][field]) state.settings.custom.branchesMeta[id][field] = id;
+    });
+
+    // ranks: read from current DOM order
+    const rankRows = Array.from(document.querySelectorAll("#rankEditList .task"));
+    const ranks = [];
+    rankRows.forEach((row, idx)=>{
+      const levelInp = row.querySelector('input[type="number"]');
+      const txt = row.querySelectorAll('input[type="text"], input:not([type])');
+      const iconInp = txt[0] || null;
+      const nameInp = txt[1] || null;
+      const level = clamp(parseInt(levelInp?.value || "1", 10), 1, 9999);
+      const icon = (iconInp?.value || "").trim() || "✨";
+      const name = (nameInp?.value || "").trim() || `Ранг ${idx+1}`;
+      ranks.push({ level, icon, name });
+    });
+    state.settings.custom.ranks = ranks.sort((a,b)=> (a.level||0)-(b.level||0));
+
+    // poverty rules
+    state.settings.custom.povertyRules = {
+      onDebuff: Number($("prDebuff").value || 0),
+      onFailDay: Number($("prFailDay").value || 0),
+      onMissCapital: Number($("prMissCapital").value || 0),
+      onCleanDay: Number($("prCleanDay").value || 0),
+      onFocus: Number($("prFocus").value || 0)
+    };
+
+    // content targets
+    state.settings.custom.contentTargets = {
+      tiktokPerDay: Math.max(0, parseInt($("ctTikTok").value || "0", 10)),
+      tgPerWeek: Math.max(0, parseInt($("ctTG").value || "0", 10)),
+      ytPerMonth: Math.max(0, parseInt($("ctYT").value || "0", 10))
+    };
+
+    $("customSavedBadge").textContent = "✅";
+    setTimeout(()=> $("customSavedBadge").textContent = "✨", 1200);
+
+    save(); render();
+    toast("Кастомизация сохранена");
+  };
+
+  $("resetCustomBtn").onclick = () => {
+    const ok = confirm("Сбросить кастомизацию к дефолту автора?");
+    if(!ok) return;
+    const def = defaultState();
+    state.settings.custom = def.settings.custom;
+    save(); render();
+    toast("Сброшено");
+  };
+
+  };
+
+  $("saveVisualBtn").onclick = () => {
+    const dim = clamp(Number($("bgDimInput").value || 0.62), 0, 0.9);
+    const blur = clamp(Number($("bgBlurInput").value || 0), 0, 24);
+    const sak = clamp(Number($("sakuraInput").value || 0.55), 0, 1);
+    state.settings.visuals.dim = dim;
+    state.settings.visuals.blurPx = blur;
+    state.settings.visuals.sakura = sak;
+    save(); render();
+    toast("Визуал сохранён");
+  };
+  $("testVisualBtn").onclick = () => { toast("Ок. Если фон мешает — подними dim или blur."); };
+
+  $("bgUpload").onchange = (ev) => {
+    const file = ev.target.files?.[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      state.settings.visuals.bgDataUrl = reader.result;
+      save(); render();
+      toast("Фон установлен");
+    };
+    reader.readAsDataURL(file);
+  };
+
+  $("clearBgBtn").onclick = () => {
+    state.settings.visuals.bgDataUrl = null;
+    save(); render();
+    toast("Фон убран");
+  };
+
+  // Idea modal
+  $("ideaModalClose").onclick = closeIdeaModal;
+  $("ideaModalBack").onclick = (e)=>{ if(e.target.id === "ideaModalBack") closeIdeaModal(); };
+  $("ideaModalSave").onclick = () => {
+    if(!openIdeaId) return;
+    const it = state.ideas.find(x=>x.id===openIdeaId);
+    if(!it) return;
+    it.platform = $("ideaModalPlatform").value;
+    it.status = $("ideaModalStatus").value;
+    it.text = $("ideaModalText").value.trim();
+    it.updatedAt = Date.now();
+    save(); render();
+    toast("Идея сохранена");
+    closeIdeaModal();
+  };
+  $("ideaModalDelete").onclick = () => {
+    if(!openIdeaId) return;
+    const ok = confirm("Удалить идею?");
+    if(!ok) return;
+    state.ideas = state.ideas.filter(x=>x.id!==openIdeaId);
+    save(); render();
+    toast("Идея удалена");
+    closeIdeaModal();
+  };
+
+  // Goal modal
+  $("goalModalClose").onclick = closeGoalModal;
+  $("goalModalBack").onclick = (e)=>{ if(e.target.id === "goalModalBack") closeGoalModal(); };
+  $("goalModalSave").onclick = () => {
+    if(!openGoalId) return;
+    const g = state.goals.find(x=>x.id===openGoalId);
+    if(!g) return;
+    g.name = $("goalModalName").value.trim();
+    g.unit = $("goalModalUnit").value.trim();
+    g.current = Math.max(0, Number($("goalModalCurrent").value || 0));
+    g.target = Math.max(0, Number($("goalModalTarget").value || 0));
+    g.deadline = $("goalModalDeadline").value || "";
+    g.note = $("goalModalNote").value.trim();
+    g.updatedAt = Date.now();
+    save(); render();
+    toast("Цель сохранена");
+    closeGoalModal();
+  };
+  $("goalModalDelete").onclick = () => {
+    if(!openGoalId) return;
+    const ok = confirm("Удалить цель?");
+    if(!ok) return;
+    state.goals = state.goals.filter(x=>x.id!==openGoalId);
+    save(); render();
+    toast("Цель удалена");
+    closeGoalModal();
+  };
+
+  setInterval(remindersTick, 20*1000);
+
+  contentResetIfNeeded();
+  save();
+  render();
+})();
+</script>
+</body>
+</html>
